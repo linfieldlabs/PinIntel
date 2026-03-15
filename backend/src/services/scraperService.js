@@ -181,13 +181,89 @@ class PinterestScraper {
   }
 
   async dismissModals(page) {
+    // 1. Click common close buttons
     for (const sel of [
       '[data-test-id="login-modal-close"]',
       '[aria-label="Close"]',
+      '[aria-label="close"]',
       'button:has-text("Not now")',
       'button:has-text("Maybe later")',
+      'div[role="button"]:has-text("x")',
+      'button:has-text("x")'
     ]) {
-      try { await page.locator(sel).first().click({ timeout: 600 }); } catch (_) {}
+      try { await page.locator(sel).first().click({ timeout: 800 }); } catch (_) {}
+    }
+
+    // 2. Force-remove the "Login Barrier" via Javascript injection
+    // This removes the full-screen overlay that says "Sign in to get the best experience"
+    await page.evaluate(() => {
+      const selectors = [
+        '[data-test-id="full-page-signup-modal"]',
+        'div[style*="z-index: 1000"]',
+        'div[style*="background-color: rgba(0, 0, 0, 0.6)"]',
+        '.full-width-signup-modal',
+        '#login-modal',
+        'div:has-text("Sign in to get the best experience")'
+      ];
+      
+      selectors.forEach(sel => {
+        try {
+          const elements = document.querySelectorAll(sel);
+          elements.forEach(el => el.remove());
+        } catch (e) {}
+      });
+
+      // Enable scrolling again if the modal locked it
+      document.body.style.overflow = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    }).catch(() => {});
+  }
+
+  async extractFromScreenshot(page) {
+    try {
+      console.log('[OCR] Preparing page for screenshot (clearing overlays)...');
+      await this.dismissModals(page);
+      
+      // Scroll a bit more to be sure
+      await page.evaluate(() => window.scrollBy(0, 500));
+      await page.waitForTimeout(1000);
+
+      console.log('[OCR] Taking screenshot for data extraction...');
+      const screenshot = await page.screenshot({ fullPage: true });
+      
+      const { createWorker } = require('tesseract.js');
+      const worker = await createWorker('eng');
+      
+      const { data: { text } } = await worker.recognize(screenshot);
+      await worker.terminate();
+
+      // Parse followers
+      const followersMatch = text.match(/([\d.,]+[km]?)\s+followers?/i);
+      const followers = followersMatch ? this.parseCount(followersMatch[1]) : 0;
+
+      // Parse boards - MUCH MORE PERMISSIVE
+      const boards = [];
+      const boardMatches = text.matchAll(/([\w\s&',./-]{2,50})[\n\r\t\s]+([\d.,]+[km]?)\s+pins?(?:[\s\S]{0,40}?(\d+\s*(?:mo?|w|d|h|y)))?/gi);
+      
+      for (const match of boardMatches) {
+        const name = match[1].trim();
+        // Ignore obvious system links
+        if (['pinterest', 'policy', 'terms', 'privacy', 'about', 'help', 'collect'].some(word => name.toLowerCase().includes(word))) continue;
+
+        boards.push({
+          name,
+          lastActive: match[3] ? this.relToMonth(match[3].trim()) : 'Recently active',
+          description: '',
+          pinCount: this.parseCount(match[2]),
+          followers: 0,
+          url: '' 
+        });
+      }
+
+      return { followers, boards };
+    } catch (err) {
+      console.error('[OCR ERR]', err.message);
+      return { followers: 0, boards: [] };
     }
   }
 
@@ -206,8 +282,8 @@ class PinterestScraper {
     const page = await ctx.newPage();
     await this.blockAssets(page);
 
-    // Virtual boards present on every profile — always ignored
-    const SKIP_BOARDS = new Set(['created', 'saved']);
+    // Virtual boards and system pages — always ignored
+    const SKIP_BOARDS = new Set(['created', 'saved', 'privacy policy', 'terms of service', 'notice at collection', 'policy', 'about', 'press', 'business']);
 
     const captured = { profile: null, boards: [] };
     const boardMap  = new Map();   // keyed by canonical board URL — prevents duplicates
@@ -267,6 +343,32 @@ class PinterestScraper {
       await page.goto(profileUrl, { waitUntil: 'domcontentloaded', timeout: this.timeout });
       await this.dismissModals(page);
 
+      // ── Step A: Ensure we are on the 'Saved' tab (where boards live) ──
+      const savedSelectors = [
+        'a[href*="/_saved/"]',
+        'div[role="tab"]:has-text("Saved")',
+        'button:has-text("Saved")',
+        'a:has-text("Saved")'
+      ];
+      
+      let tabFound = false;
+      for (const sel of savedSelectors) {
+        try {
+          const el = page.locator(sel).first();
+          if (await el.count() > 0) {
+            console.log(`[Scraper] Clicking "Saved" tab (${sel})...`);
+            await el.click().catch(() => {});
+            tabFound = true;
+            break;
+          }
+        } catch (_) {}
+      }
+
+      if (tabFound) {
+        await page.waitForTimeout(2000); 
+        await this.dismissModals(page); // Dismiss any modal that appeared after clicking
+      }
+
       /* Scroll to trigger lazy-loaded board API calls */
       for (let i = 0; i < 8; i++) {
         await page.evaluate(() => window.scrollBy(0, window.innerHeight * 2));
@@ -319,24 +421,35 @@ class PinterestScraper {
         const domBoards = await page.evaluate((uname) => {
           const seen    = new Set();
           const results = [];
+          const SKIPS = ['followers', 'following', 'pins', 'created', 'saved', 'search', 'settings', 'policy', 'about', 'press', 'business', 'newsroom'];
 
           // Improved selector: any link that looks like a board
           const links = Array.from(document.querySelectorAll('a[href*="/"]'));
           
           links.forEach(a => {
             const href  = a.getAttribute('href') || '';
+            
+            // 1. Must be a relative Pinterest link or belong to pinterest.com
+            if (href.startsWith('http') && !href.includes('pinterest.com')) return;
+            
             const parts = href.split('/').filter(Boolean);
             
-            // Boards usually have 2+ parts (username/board-name)
+            // 2. Boards usually have exactly 2 parts (/username/board-name/) or start with the username
+            // We ignore links starting with SKIPS keywords or containing underscore system paths
             if (parts.length < 2) return;
-            if (['followers', 'following', 'pins', 'created', 'saved', 'search', 'settings'].includes(parts[1])) return;
+            if (parts.some(p => SKIPS.includes(p.toLowerCase()) || p === '_')) return;
+            
             if (seen.has(href)) return;
             seen.add(href);
 
             const nameEl = a.querySelector('h3,h2,h1,[data-test-id="board-name"], div[role="heading"]');
             const name   = (nameEl?.textContent?.trim() || a.textContent?.split('\n')[0]?.trim() || '').trim();
+            
+            // 3. Strict name filtering
             if (!name || name.length < 2) return;
-            if (['created', 'saved'].includes(name.toLowerCase())) return;
+            const lowerName = name.toLowerCase();
+            if (SKIPS.some(s => lowerName.includes(s))) return;
+            if (['created', 'saved', 'privacy policy', 'terms of service', 'notice at collection'].includes(lowerName)) return;
 
             const txt = a.textContent || '';
 
@@ -376,6 +489,20 @@ class PinterestScraper {
         // (actual cap applied in scrapeProfile after sorting — just store all here)
         captured.boards = domBoards;
         console.log(`[DOM] Boards fallback: ${domBoards.length}`);
+      }
+
+      /* ── OCR Fallback ── */
+      if (captured.boards.length === 0) {
+        console.log('[Screenshot] OCR fallback...');
+        const ocrData = await this.extractFromScreenshot(page);
+        if (ocrData.boards.length > 0) {
+          captured.boards = ocrData.boards;
+          if (ocrData.followers > 0 && (!captured.profile || captured.profile.followers === 0)) {
+            if (!captured.profile) captured.profile = { name: '', username: '', followers: 0 };
+            captured.profile.followers = ocrData.followers;
+          }
+          console.log(`[OCR] Extracted ${ocrData.boards.length} boards via screenshot`);
+        }
       }
 
     } finally {
