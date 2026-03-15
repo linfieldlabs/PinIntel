@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { SAMPLE_DATA } from '../data/sampleReport';
 import { 
   ArrowLeft, LayoutTemplate, Search, 
   Image as ImageIcon, Layers, TrendingUp, Heart, 
@@ -38,6 +39,12 @@ const GeneralImprovementsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (id === 'sample') {
+      setResults(SAMPLE_DATA);
+      setLoading(false);
+      return;
+    }
+
     const fetchResults = async () => {
       try {
         const response = await axios.get(`/api/analysis/${id}/results`);

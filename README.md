@@ -1,100 +1,102 @@
-# PinIntel Pro 🚀
+# PinIntel Pro
 
-**PinIntel Pro** is an advanced Pinterest Board Intelligence and Competitive Analysis tool. It helps brands and creators optimize their Pinterest presence for "Generative Engine Optimization" (GEO) and AI-driven discovery.
+PinIntel Pro is a specialized analytics and intelligence platform designed for Pinterest board management and competitive strategy. The system automates the process of gathering market data, calculating performance metrics, and generating strategic recommendations for organic growth.
 
-![PinIntel Pro](https://raw.githubusercontent.com/your-repo/pinintel-pro/main/preview.png) *(Note: Add actual screenshot if available)*
+## Project Description
 
-## ✨ Features
+The platform provides a comprehensive audit of Pinterest profiles and boards. It is designed for agencies and brands that need to move beyond basic native analytics into "Generative Engine Optimization" (GEO). By analyzing profile authority, keyword alignment, and posting consistency, the tool helps users understand how their content is positioned within the Pinterest algorithm relative to their competitors.
 
-- **GEO Health Score**: A comprehensive 0-100 score measuring your profile's performance across 5 advanced metrics:
-  - GEO Strength (Search clarity)
-  - GEO Authority (Trust signals)
-  - Social Traction (Interaction)
-  - Frequency (Upkeep)
-  - AI Reach (Recommendation probability)
-- **Board Quality Analyzer**: Automated audit of individual boards identifying technical issues and providing actionable optimization suggestions.
-- **Priority Fix Ranking**: A smart list of optimizations sorted by **Impact vs. Effort**, helping you tackle the most important tasks first.
-- **Competitive Leaderboard**: Real-time ranking against up to 5 competitors based on engagement and follower growth.
-- **Keyword & Topic Gap Analysis**: Discover which keywords and content topics your competitors are winning on that you haven't tapped yet.
-- **Content Format Audit**: Analyze the distribution of Image, Idea, and Video pins to match market leaders.
-- **AI-Powered Insights**: Executive summaries and strategy recommendations powered by Groq LLM (Llama 3).
+## Core Methodology
 
-## 🛠️ Tech Stack
+The system operates through three primary layers:
 
-- **Frontend**: React, Vite, Tailwind CSS, Lucide Icons, Recharts.
-- **Backend**: Node.js, Express, Playwright (Scraping engine).
-- **AI**: Groq API (Llama 3 70B), Custom Scoring & Intelligence Engines.
-- **Data**: In-memory storage with TTL (24-hour analysis lifespan).
+1. Data Acquisition (Scraping):
+   The backend utilizes a Playwright-based scraper to collect real-time data from Pinterest. It employs a multi-tiered approach to ensure reliability:
 
-## 🚀 Getting Started
+- API Interception: Captures data directly from internal Pinterest responses.
+- DOM Parsing: Extracts information from the page structure as a fallback.
+- OCR (Optical Character Recognition): Uses Tesseract.js to interpret data from screenshots when high-level anti-scraping measures are encountered.
 
-### Prerequisites
+2. Scoring Engine:
+   The raw data is processed through a proprietary scoring engine that evaluates 25 distinct metrics. These metrics measure engagement velocity, semantic depth, and account authority.
 
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [npm](https://www.npmjs.com/)
-- [Groq API Key](https://wow.groq.com/) (Optional, for AI insights)
+3. Intelligence Engine:
+   The intelligence layer translates scores into actionable strategy. It predicts posting frequency, identifies content format gaps, and benchmarks engagement averages against market standards to provide personalized growth playbooks.
 
-### Installation
+## System Requirements
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/pinterest-board-intelligence.git
-   cd pinterest-board-intelligence
-   ```
+Technical prerequisites for running PinIntel Pro:
 
-2. **Setup Backend**:
-   ```bash
-   cd backend
-   npm install
-   npx playwright install chromium
-   ```
-   - Create a `.env` file in the `backend` directory based on `.env.example`.
-   - Add your `GROQ_API_KEY`.
+- Node.js: Version 18.x or higher (LTS recommended).
+- npm: Standard package manager included with Node.js.
+- Operating System: Compatible with Windows, macOS, and Linux.
+- Web Browser: Playwright requires Chromium installation for backend operations.
 
-3. **Setup Frontend**:
-   ```bash
-   cd ../frontend
-   npm install
-   ```
+## Installation and Setup
 
-### Running the Application
+### 1. Repository Initialization
 
-1. **Start Backend**:
-   ```bash
-   cd backend
-   npm start
-   ```
-   The backend will run on [http://localhost:5000](http://localhost:5000).
+Clone the repository and enter the project directory:
 
-2. **Start Frontend**:
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-   The frontend will run on [http://localhost:5173](http://localhost:5173).
-
-## 📂 Project Structure
-
-```text
-├── backend
-│   ├── src
-│   │   ├── ai            # Scoring & Intelligence logic
-│   │   ├── routes        # API endpoints
-│   │   ├── services      # Scraper, Groq, and Analysis services
-│   │   └── server.js     # Express App entry
-│   └── .env              # Backend configuration
-├── frontend
-│   ├── src
-│   │   ├── components    # Shared UI components
-│   │   ├── pages         # Landing, Setup, and Dashboard views
-│   │   └── App.jsx       # Routing logic
-│   └── vite.config.js    # Frontend build config
-└── README.md             # Project documentation
+```bash
+git clone https://github.com/linfieldlabs/PinIntel.git
+cd pinterest-board-intelligence
 ```
 
-## 📝 License
+### 2. Backend Installation
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Navigate to the backend directory and install the necessary dependencies:
+
+```bash
+cd backend
+npm install
+npx playwright install chromium
+```
+
+Create a .env file in the backend root and define the following:
+
+- PORT=5000
+- GROQ_API_KEY=your_optional_api_key (for AI-driven insights)
+
+### 3. Frontend Installation
+
+Navigate to the frontend directory and install dependencies:
+
+```bash
+cd ../frontend
+npm install
+```
+
+## Running the Application
+
+Both servers must be running simultaneously for the application to function correctly.
+
+### Start the Backend Server
+
+```bash
+cd backend
+npm start
+```
+
+The backend API initializes on http://localhost:5000.
+
+### Start the Frontend Interface
+
+```bash
+cd frontend
+npm start
+```
+
+The frontend interface will open on http://localhost:3000 (standard React/Vite port).
+
+## Project Structure
+
+- /backend: Express.js server and data processing logic.
+- /backend/src/services: Playwright scraper and external API integrations.
+- /backend/src/ai: Scoring and intelligence algorithms.
+- /frontend: React/Vite application.
+- /frontend/src/pages: Component-based dashboard and landing views.
 
 ---
-Built with ❤️ for AI Undergraduates and Pinterest Strategists.
+
+Technical documentation for PinIntel Pro Intelligence Platform.

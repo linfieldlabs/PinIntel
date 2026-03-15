@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { SAMPLE_DATA } from '../data/sampleReport';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend
@@ -138,6 +139,12 @@ const DashboardPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
+    if (id === 'sample') {
+      setResults(SAMPLE_DATA);
+      setLoading(false);
+      return;
+    }
+
     const fetchResults = async () => {
       try {
         const response = await axios.get(`/api/analysis/${id}/results`);
@@ -235,12 +242,12 @@ const DashboardPage = () => {
       {/* ── HEADER ─────────────────────────────────────────────── */}
       <header className="border-b border-slate-800 bg-[#1e293b]/70 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
               <div className="w-5 h-5 border-[3px] border-white rounded-full"/>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">
-              PinIntel <span className="text-primary">Pro</span>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white italic">
+              PinIntel <span className="text-primary italic">Pro</span>
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -352,7 +359,7 @@ const DashboardPage = () => {
         ══════════════════════════════════════════════════════════ */}
         <Card>
           <CardHeader icon={BarChart2} title="Engagement Benchmark"
-            subtitle="Average estimated saves per pin — your brand vs competitors"/>
+            subtitle="Calculated average saves per pin — brand vs market strategy standards"/>
           <div className="p-6 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="col-span-2">
@@ -442,13 +449,13 @@ const DashboardPage = () => {
 
           {/* Feature 5 — Content Format Gap */}
           <Card>
-            <CardHeader icon={TrendingUp} title="Content Format Gap"
-              subtitle="Pin format distribution — your brand vs top competitors"/>
+            <CardHeader icon={TrendingUp} title="Strategic Format Mix"
+              subtitle="AI-Predicted pin format distribution — based on market strategy & authority"/>
             <div className="p-6 pt-4">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* Brand */}
                 <div>
-                  <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Your Brand</p>
+                  <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">Predicted Mix (You)</p>
                   <ResponsiveContainer width="100%" height={140}>
                     <PieChart>
                       <Pie data={formatDataBrand} cx="50%" cy="50%" innerRadius={35} outerRadius={55}
@@ -472,7 +479,7 @@ const DashboardPage = () => {
                 </div>
                 {/* Competitors */}
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Competitors</p>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Strategic Target (Comps)</p>
                   <ResponsiveContainer width="100%" height={140}>
                     <PieChart>
                       <Pie data={formatDataComp} cx="50%" cy="50%" innerRadius={35} outerRadius={55}
@@ -516,7 +523,7 @@ const DashboardPage = () => {
           {/* Feature 6 — Posting Consistency */}
           <Card>
             <CardHeader icon={Clock} title="Posting Consistency"
-              subtitle="Estimated posting frequency and gap analysis"/>
+              subtitle="AI-Predicted posting frequency and strategic gap analysis"/>
             <div className="p-6 pt-4">
               <div className="flex items-center gap-6 mb-6">
                 <ScoreRing score={postingConsistency.consistencyScore} size={88} />

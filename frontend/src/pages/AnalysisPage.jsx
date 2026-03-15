@@ -68,8 +68,15 @@ const AnalysisPage = () => {
   return (
     <div className="bg-[#0a0a0a] text-gray-100 min-h-screen flex items-center justify-center p-6">
       <main className="w-full max-w-2xl bg-surface-50 border border-surface-100 rounded-custom p-8 md:p-12 shadow-2xl">
-        <header className="mb-12 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Pinterest Board Intelligence</h1>
+        <header className="mb-12 flex flex-col items-center text-center">
+          <div className="flex items-center gap-4 cursor-pointer mb-6" onClick={() => navigate('/')}>
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+              <div className="w-5 h-5 border-[3px] border-white rounded-full"/>
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white uppercase italic">
+              PinIntel
+            </h1>
+          </div>
           <p className="text-gray-400 text-sm">
             Our algorithms are currently processing your request to provide deep market insights.
           </p>
