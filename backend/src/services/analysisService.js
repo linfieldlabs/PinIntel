@@ -4,7 +4,7 @@ const scraperService      = require('./scraperService');
 const scoringEngine       = require('../ai/scoringEngine');
 const recommendationEngine = require('../ai/recommendationEngine');
 const intelligenceEngine  = require('../ai/intelligenceEngine');
-const groqService         = require('./groqService');
+const bedrockService      = require('./amazonBedrockService');
 
 // Hard cap — must match scoringEngine.js MAX_BOARDS
 const MAX_BOARDS = 10;
@@ -397,20 +397,23 @@ class AnalysisService {
   // ──────────────────────────────────────────────────────────────────────────
   async generateLLMInsightsSafe(brandProfile, scores, intelligence, keywords) {
     try {
+      const activeService = bedrockService; // Nova only
+
       const [summaryResult, healthResult, strategyResult] = await Promise.allSettled([
-        groqService.generateAdvancedSummary?.(scores, brandProfile, keywords),
-        groqService.explainHealthScore?.(
+        activeService.generateAdvancedSummary?.(scores, brandProfile, keywords),
+        activeService.explainHealthScore?.(
           intelligence.brandScore?.healthScore,
           intelligence.brandScore?.breakdown,
           brandProfile.name
         ),
-        groqService.generateContentStrategy?.(brandProfile, keywords)
+        activeService.generateContentStrategy?.(brandProfile, keywords)
       ]);
 
       return {
         executiveSummary:  summaryResult.status  === 'fulfilled' ? summaryResult.value  : null,
         healthExplanation: healthResult.status   === 'fulfilled' ? healthResult.value   : null,
-        contentStrategy:   strategyResult.status === 'fulfilled' ? strategyResult.value : null
+        contentStrategy:   strategyResult.status === 'fulfilled' ? strategyResult.value : null,
+        aiProvider: 'Amazon Nova (ap-south-1)'
       };
     } catch (error) {
       console.warn('LLM insights failed:', error.message);

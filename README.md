@@ -21,7 +21,7 @@ The system operates through three primary layers:
    The raw data is processed through a proprietary scoring engine that evaluates 25 distinct metrics. These metrics measure engagement velocity, semantic depth, and account authority.
 
 3. Intelligence Engine:
-   The intelligence layer translates scores into actionable strategy. It predicts posting frequency, identifies content format gaps, and benchmarks engagement averages against market standards to provide personalized growth playbooks.
+   The intelligence layer translates scores into actionable strategy. It leverages Amazon Nova foundation models via Amazon Bedrock to predict posting frequency, identify content format gaps, and benchmark engagement averages against market standards to provide personalized growth playbooks.
 
 ## System Requirements
 
@@ -31,6 +31,7 @@ Technical prerequisites for running PinIntel Pro:
 - npm: Standard package manager included with Node.js.
 - Operating System: Compatible with Windows, macOS, and Linux.
 - Web Browser: Playwright requires Chromium installation for backend operations.
+- AWS Account: Access to Amazon Bedrock and Nova foundation models.
 
 ## Installation and Setup
 
@@ -56,7 +57,9 @@ npx playwright install chromium
 Create a .env file in the backend root and define the following:
 
 - PORT=5000
-- GROQ_API_KEY=your_optional_api_key (for AI-driven insights)
+- AWS_ACCESS_KEY_ID=your_access_key
+- AWS_SECRET_ACCESS_KEY=your_secret_key
+- AWS_REGION=ap-south-1
 
 ### 3. Frontend Installation
 
