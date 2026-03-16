@@ -57,9 +57,7 @@ const SetupPage = () => {
     <div className="min-h-screen bg-[#0f0f0f] text-gray-100">
       <header className="border-b border-surface-border bg-surface-50 h-20 px-8 flex justify-between items-center">
         <div className="flex items-center space-x-4 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-            <div className="w-5 h-5 border-[3px] border-white rounded-full"></div>
-          </div>
+          <img src="/favicon.png" alt="PinIntel Pro Logo" className="w-10 h-10 object-contain drop-shadow-md" />
           <h1 className="text-2xl font-extrabold tracking-tight text-white uppercase italic">PinIntel</h1>
         </div>
       </header>

@@ -12,9 +12,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <div className="w-5 h-5 border-[3px] border-white rounded-full"></div>
-              </div>
+              <img src="/favicon.png" alt="PinIntel Pro Logo" className="w-10 h-10 object-contain drop-shadow-md" />
               <span className="text-2xl font-extrabold tracking-tight text-white uppercase italic">PinIntel</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">

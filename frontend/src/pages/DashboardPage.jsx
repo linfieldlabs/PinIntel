@@ -243,9 +243,7 @@ const DashboardPage = () => {
       <header className="border-b border-slate-800 bg-[#1e293b]/70 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <div className="w-5 h-5 border-[3px] border-white rounded-full"/>
-            </div>
+            <img src="/favicon.png" alt="PinIntel Pro Logo" className="w-10 h-10 object-contain drop-shadow-md" />
             <h1 className="text-2xl font-extrabold tracking-tight text-white italic">
               PinIntel <span className="text-primary italic">Pro</span>
             </h1>
