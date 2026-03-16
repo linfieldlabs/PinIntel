@@ -27,7 +27,7 @@ The system operates through three primary layers:
 
 Technical prerequisites for running PinIntel Pro:
 
-- Node.js: Version 18.x or higher (LTS recommended).
+- Node.js: Version 22.x (current LTS).
 - npm: Standard package manager included with Node.js.
 - Operating System: Compatible with Windows, macOS, and Linux.
 - Web Browser: Playwright requires Chromium installation for backend operations.
